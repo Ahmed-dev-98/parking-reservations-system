@@ -1,11 +1,12 @@
-import { AuthResponse } from '@/types/api';
+import { EROUTES } from '@/constants/routes';
+import AuthService from '@/services/auth.service';
 import axios, { AxiosInstance, } from 'axios';
 
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
 class ApiClient {
-    private client: AxiosInstance;
+    public client: AxiosInstance;
 
     constructor() {
         this.client = axios.create({
@@ -17,7 +18,7 @@ class ApiClient {
 
         // Add auth token interceptor
         this.client.interceptors.request.use((config) => {
-            const token = this.getAuthToken();
+            const token = AuthService.getAuthToken();
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`;
             }
@@ -29,9 +30,9 @@ class ApiClient {
             (response) => response,
             (error) => {
                 if (error.response?.status === 401) {
-                    this.clearAuthToken();
+                    AuthService.clearAuthToken();
                     if (typeof window !== 'undefined') {
-                        window.location.href = '/login';
+                        window.location.href = EROUTES.LOGIN;
                     }
                 }
                 return Promise.reject(error);
@@ -39,34 +40,7 @@ class ApiClient {
         );
     }
 
-    private getAuthToken(): string | null {
-        if (typeof window === 'undefined') return null;
-        return localStorage.getItem('authToken');
-    }
 
-    private setAuthToken(token: string): void {
-        if (typeof window === 'undefined') return;
-        localStorage.setItem('authToken', token);
-    }
-
-    private clearAuthToken(): void {
-        if (typeof window === 'undefined') return;
-        localStorage.removeItem('authToken');
-    }
-
-    // Auth endpoints
-    async login(username: string, password: string): Promise<AuthResponse> {
-        const response = await this.client.post<AuthResponse>('/auth/login', {
-            username,
-            password,
-        });
-        this.setAuthToken(response.data.token);
-        return response.data;
-    }
-
-    logout(): void {
-        this.clearAuthToken();
-    }
 }
 
-export const apiClient = new ApiClient();
+export const { client } = new ApiClient();
