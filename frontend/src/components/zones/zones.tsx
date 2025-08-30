@@ -15,11 +15,9 @@ const Zones = () => {
   React.useEffect(() => {
     if (gateId) {
       subscribe(gateId as string);
-      console.log("Visitor subscribed to gate:", gateId);
 
       return () => {
         unsubscribe(gateId as string);
-        console.log("Visitor unsubscribed from gate:", gateId);
       };
     }
   }, [gateId, subscribe, unsubscribe]);

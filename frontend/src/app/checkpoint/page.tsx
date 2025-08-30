@@ -38,6 +38,7 @@ const CheckpointPage = () => {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [scannedTicketId, setScannedTicketId] = useState<string>("");
   const { mutateAsync: checkout, data: checkoutData } = useCheckout();
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Fetch ticket details when we have a scanned ticket
@@ -194,16 +195,20 @@ const CheckpointPage = () => {
                       </div>
 
                       <AlertDialog>
-                        <AlertDialogTrigger className="w-full flex">
-                          <div className="flex gap-3 pt-3 border-t border-orange-200 dark:border-orange-800">
-                            <Button
-                              variant="outline"
-                              className="flex-1 border-orange-300 text-orange-700 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-900/20"
-                            >
-                              Plate Doesn&apos;t Match - Convert to Visitor
-                            </Button>
-                          </div>
-                        </AlertDialogTrigger>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            className="flex-1"
+                            onClick={() => {
+                              inputRef.current!.value = "";
+                              setScannedTicketId("");
+                            }}
+                          >
+                            Open Gate
+                          </Button>
+                          <AlertDialogTrigger className="flex-1 border rounded-sm py-2 px-3 cursor-pointer border-orange-300 text-orange-700 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-900/20">
+                            Plate Doesn&apos;t Match - Convert to Visitor
+                          </AlertDialogTrigger>
+                        </div>
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>
@@ -241,17 +246,24 @@ const CheckpointPage = () => {
                     <div className="space-y-4">
                       <p className="text-sm text-muted-foreground">
                         This is a subscriber ticket. but it does not have a
-                        subscription ID related to it.
+                        subscription ID related to it to fetch the cars list.
                       </p>
                       <AlertDialog>
-                        <AlertDialogTrigger className="w-full flex">
+                        <div className="flex items-center gap-2">
                           <Button
-                            variant="outline"
-                            className="flex-1 border-orange-300 text-orange-700 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-900/20"
+                            className="flex-1"
+                            onClick={() => {
+                              inputRef.current!.value = "";
+                              setScannedTicketId("");
+                              handleCheckout();
+                            }}
                           >
-                            Convert to Visitor Ticket
+                            Open Gate
                           </Button>
-                        </AlertDialogTrigger>
+                          <AlertDialogTrigger className="flex-1 border rounded-sm py-2 px-3 cursor-pointer border-orange-300 text-orange-700 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-900/20">
+                            Convert to Visitor Ticket
+                          </AlertDialogTrigger>
+                        </div>
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>

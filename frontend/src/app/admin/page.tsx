@@ -36,7 +36,24 @@ const AdminPage = () => {
   const { data: parkingStates } = useParkingStateReport();
 
   // Use global WebSocket connection
-  const { connection, isConnected } = useWebSocketContext();
+  const { connection, isConnected, subscribe, unsubscribe } =
+    useWebSocketContext();
+
+  // Subscribe to all gates for comprehensive real-time updates
+  React.useEffect(() => {
+    if (gates && gates.length > 0) {
+      // Subscribe to all gates to receive comprehensive real-time updates
+      gates.forEach((gate) => {
+        subscribe(gate.id);
+      });
+
+      return () => {
+        gates.forEach((gate) => {
+          unsubscribe(gate.id);
+        });
+      };
+    }
+  }, [gates, subscribe, unsubscribe]);
 
   const totalSlots =
     parkingStates?.reduce((sum, zone) => sum + zone.totalSlots, 0) || 0;

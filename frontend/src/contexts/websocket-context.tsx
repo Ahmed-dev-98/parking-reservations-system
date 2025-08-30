@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, {
@@ -50,7 +51,6 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     (event: MessageEvent) => {
       try {
         const message = JSON.parse(event.data);
-        console.log("Global WebSocket received message:", message);
 
         if (message.type === "zone-update") {
           const zoneUpdate = message;
@@ -78,7 +78,12 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           queryClient.setQueryData(
             QUERY_KEYS.adminParkingState,
             (oldData: any[]) => {
-              if (!oldData) return oldData;
+              if (!oldData) {
+                queryClient.invalidateQueries({
+                  queryKey: QUERY_KEYS.adminParkingState,
+                });
+                return oldData;
+              }
               return oldData.map((zone) =>
                 zone.id === updatedZone.id
                   ? {
@@ -90,10 +95,12 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
             }
           );
 
-          console.log("Zone updated globally:", updatedZone);
+          // Also invalidate to ensure fresh data on next access
+          queryClient.invalidateQueries({
+            queryKey: QUERY_KEYS.adminParkingState,
+          });
         } else if (message.type === "admin-update") {
           const adminUpdate = message;
-          console.log("Global admin update:", adminUpdate);
 
           if (adminUpdate.payload?.action === "category-rates-changed") {
             const { targetId, details } = adminUpdate.payload;
@@ -103,11 +110,6 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
               (details.rateNormal !== undefined ||
                 details.rateSpecial !== undefined)
             ) {
-              console.log("Processing global category rate change:", {
-                targetId,
-                details,
-              });
-
               // Update all zone queries that belong to this category
               const queryCache = queryClient.getQueryCache();
               const zoneQueries = queryCache.findAll({
@@ -152,11 +154,6 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
                   );
                 }
               );
-
-              console.log(
-                "Category rates updated globally for category:",
-                targetId
-              );
             }
           } else if (
             adminUpdate.payload?.action === "zone-opened" ||
@@ -164,12 +161,6 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           ) {
             const { targetId, action } = adminUpdate.payload;
             const isOpen = action === "zone-opened";
-
-            console.log("Processing global zone status change:", {
-              targetId,
-              action,
-              isOpen,
-            });
 
             // Update all zone queries
             const queryCache = queryClient.getQueryCache();
@@ -199,8 +190,6 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
                 );
               }
             );
-
-            console.log("Zone status updated globally for zone:", targetId);
           }
         }
       } catch (error) {
@@ -216,11 +205,9 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     }
 
     try {
-      console.log("Creating global WebSocket connection...");
       const ws = new WebSocket(WS_URL);
 
       ws.onopen = () => {
-        console.log("Global WebSocket connected");
         reconnectAttemptsRef.current = 0;
         setIsConnected(true);
       };
@@ -228,32 +215,25 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       ws.onmessage = handleMessage;
 
       ws.onclose = () => {
-        console.log("Global WebSocket disconnected");
         setIsConnected(false);
 
         // Attempt to reconnect if not manually closed
         if (reconnectAttemptsRef.current < maxReconnectAttempts) {
           reconnectAttemptsRef.current++;
-          console.log(
-            `Attempting to reconnect... (${reconnectAttemptsRef.current}/${maxReconnectAttempts})`
-          );
 
           reconnectTimeoutRef.current = setTimeout(() => {
             connect();
           }, reconnectDelay);
-        } else {
-          console.log("Max reconnection attempts reached");
         }
       };
 
-      ws.onerror = (error) => {
-        console.error("Global WebSocket error:", error);
+      ws.onerror = () => {
         setIsConnected(false);
       };
 
       wsRef.current = ws;
-    } catch (error) {
-      console.error("Failed to create global WebSocket connection:", error);
+    } catch {
+      // Silent error handling
     }
   }, [handleMessage]);
 
@@ -279,7 +259,6 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         payload: { gateId },
       };
       wsRef.current.send(JSON.stringify(message));
-      console.log("Subscribed to gate:", gateId);
     }
   }, []);
 
@@ -290,7 +269,6 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         payload: { gateId },
       };
       wsRef.current.send(JSON.stringify(message));
-      console.log("Unsubscribed from gate:", gateId);
     }
   }, []);
 
