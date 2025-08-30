@@ -3,7 +3,13 @@
 
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/auth-context";
+import {
+  useIsEmployee,
+  useIsAdmin,
+  useIsAuthenticated,
+  useAuthLoading,
+  useLogin,
+} from "@/store/auth-store";
 import {
   Card,
   CardContent,
@@ -25,13 +31,11 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const {
-    login,
-    isEmployee,
-    isAdmin,
-    isAuthenticated,
-    loading: authLoading,
-  } = useAuth();
+  const isEmployee = useIsEmployee();
+  const isAdmin = useIsAdmin();
+  const isAuthenticated = useIsAuthenticated();
+  const authLoading = useAuthLoading();
+  const login = useLogin();
   const router = useRouter();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

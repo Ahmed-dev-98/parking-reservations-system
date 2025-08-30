@@ -2,10 +2,15 @@
 
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { ThemeToggle } from "./ui/theme-toggle";
 import { useRouter } from "next/navigation";
 import { EROUTES } from "@/constants/routes";
-import { useAuth } from "@/contexts/auth-context";
+import {
+  useUser,
+  useIsAuthenticated,
+  useIsAdmin,
+  useIsEmployee,
+  useLogout,
+} from "@/store/auth-store";
 import { LogOut, User, Shield } from "lucide-react";
 
 export function Layout({
@@ -16,7 +21,11 @@ export function Layout({
   title: string;
 }) {
   const router = useRouter();
-  const { user, logout, isAuthenticated, isAdmin, isEmployee } = useAuth();
+  const user = useUser();
+  const isAuthenticated = useIsAuthenticated();
+  const isAdmin = useIsAdmin();
+  const isEmployee = useIsEmployee();
+  const logout = useLogout();
 
   const handleNavigate = (path: string) => {
     router.push(path);
@@ -40,7 +49,6 @@ export function Layout({
           {user?.role}
         </span>
       </div>
-      <ThemeToggle />
 
       {/* Role-based navigation */}
       {isAdmin && (
@@ -71,7 +79,6 @@ export function Layout({
 
   const renderUnauthenticatedNav = () => (
     <div className="flex items-center space-x-4">
-      <ThemeToggle />
       <Button variant="default" onClick={() => handleNavigate(EROUTES.LOGIN)}>
         Sign In
       </Button>

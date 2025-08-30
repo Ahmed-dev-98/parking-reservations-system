@@ -1,6 +1,10 @@
 "use client";
 
-import { useAuth } from "@/contexts/auth-context";
+import {
+  useUser,
+  useIsAuthenticated,
+  useAuthLoading,
+} from "@/store/auth-store";
 import { LoadingPage } from "@/components/ui/loading";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -17,16 +21,14 @@ export function ProtectedRoute({
   requiredRole,
   fallbackRoute,
 }: ProtectedRouteProps) {
-  const { user, loading, isAuthenticated } = useAuth();
+  const user = useUser();
+  const isAuthenticated = useIsAuthenticated();
+  const loading = useAuthLoading();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading) {
-      // Not authenticated - redirect to login
       if (!isAuthenticated) {
-        console.log(
-          "====================redirecting to login reason not authenticated ===================="
-        );
         router.push(EROUTES.LOGIN);
         return;
       }

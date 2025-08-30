@@ -3,10 +3,9 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
-import { ThemeProvider } from "@/contexts/theme-context";
-import { AuthProvider } from "@/contexts/auth-context";
 import { WebSocketProvider } from "@/contexts/websocket-context";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthInitializer } from "@/components/auth-initializer";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -20,7 +19,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
               // Don't retry on 401/403 errors
               if (
                 error?.response?.status === 401 ||
-                error?.response?.status === 403
+                error?.response?.status === 403 ||
+                error?.response?.status === 404
               ) {
                 return false;
               }
@@ -36,12 +36,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <AuthProvider>
-          <WebSocketProvider>{children}</WebSocketProvider>
-          <Toaster />
-        </AuthProvider>
-      </ThemeProvider>
+      <AuthInitializer>
+        <WebSocketProvider>{children}</WebSocketProvider>
+        <Toaster />
+      </AuthInitializer>
     </QueryClientProvider>
   );
 }
