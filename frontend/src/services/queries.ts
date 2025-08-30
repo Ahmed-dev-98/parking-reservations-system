@@ -2,9 +2,10 @@ import { QUERY_KEYS } from "@/constants/query-keys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import gateService from "./gate.service";
 import zoneService from "./zone.service";
-import { CheckinRequest, CheckoutRequest, Zone } from "@/types/api";
+import { CheckinRequest, CheckoutRequest, Zone, UpdateCategoryRequest, CreateRushHourRequest, CreateVacationRequest, UpdateZoneOpenRequest, Category } from "@/types/api";
 import ticketService from "./ticket.service";
 import subscriptionService from "./subscription.service";
+import adminService from "./admin.service";
 
 
 
@@ -22,11 +23,11 @@ export const useGates = () => {
     });
 };
 
-export const useZones = () => {
+export const useZones = (gateId?: string) => {
     return useQuery({
-        queryKey: QUERY_KEYS.zones,
+        queryKey: gateId ? [...QUERY_KEYS.zones, gateId] : QUERY_KEYS.zones,
         queryFn: () => {
-            return zoneService.getZones();
+            return zoneService.getZones(gateId);
         },
     });
 };
@@ -37,19 +38,27 @@ export const useCheckin = () => {
     return useMutation({
         mutationFn: (request: CheckinRequest) => ticketService.checkin(request),
         onSuccess: (data) => {
-            // Invalidate zones to refresh zone state
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zones });
+            // Invalidate all zone queries to refresh zone state
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zones, exact: false });
+
             // Update specific zone if we have gate context
             if (data.zoneState) {
-                queryClient.setQueryData(
-                    QUERY_KEYS.zones,
-                    (oldData: Zone[] | undefined) => {
-                        if (!oldData) return oldData;
-                        return oldData.map(zone =>
-                            zone.id === data.zoneState.id ? data.zoneState : zone
-                        );
+                const queryCache = queryClient.getQueryCache();
+                const zoneQueries = queryCache.findAll({
+                    queryKey: QUERY_KEYS.zones,
+                    exact: false
+                });
+
+                zoneQueries.forEach(query => {
+                    if (query.state.data) {
+                        queryClient.setQueryData(query.queryKey, (oldData: Zone[]) => {
+                            if (!oldData) return oldData;
+                            return oldData.map(zone =>
+                                zone.id === data.zoneState.id ? data.zoneState : zone
+                            );
+                        });
                     }
-                );
+                });
             }
         },
     });
@@ -60,7 +69,7 @@ export const useCheckout = () => {
     return useMutation({
         mutationFn: (request: CheckoutRequest) => ticketService.checkout(request),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zones });
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zones, exact: false });
         },
     });
 };
@@ -80,3 +89,116 @@ export const useSubscription = (subscriptionId: string) => {
         enabled: !!subscriptionId,
     });
 };
+
+// Admin hooks
+
+export const useCategories = () => {
+    return useQuery({
+        queryKey: QUERY_KEYS.adminCategories,
+        queryFn: () => adminService.getCategories(),
+    });
+};
+
+
+export const useUpdateCategory = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, request }: { id: string; request: UpdateCategoryRequest }) =>
+            adminService.updateCategory(id, request),
+        onSuccess: (_, { id, request }) => {
+            // Update categories cache first
+            queryClient.setQueryData<Category[]>(
+                QUERY_KEYS.adminCategories,
+                (oldData) => {
+                    if (!oldData) return oldData;
+                    return oldData.map(category =>
+                        category.id === id
+                            ? {
+                                ...category,
+                                name: request.name ?? category.name,
+                                description: request.description ?? category.description,
+                                rateNormal: request.rateNormal ?? category.rateNormal,
+                                rateSpecial: request.rateSpecial ?? category.rateSpecial
+                            }
+                            : category
+                    );
+                }
+            );
+
+            // Update zones that belong to this category with new rates
+            if (request.rateNormal !== undefined || request.rateSpecial !== undefined) {
+                // Update all zone queries (both base and gate-specific)
+                const queryCache = queryClient.getQueryCache();
+                const zoneQueries = queryCache.findAll({
+                    queryKey: QUERY_KEYS.zones,
+                    exact: false
+                });
+
+                zoneQueries.forEach(query => {
+                    if (query.state.data) {
+                        queryClient.setQueryData(query.queryKey, (oldData: Zone[]) => {
+                            if (!oldData) return oldData;
+                            return oldData.map(zone =>
+                                zone.categoryId === id
+                                    ? {
+                                        ...zone,
+                                        rateNormal: request.rateNormal ?? zone.rateNormal,
+                                        rateSpecial: request.rateSpecial ?? zone.rateSpecial
+                                    }
+                                    : zone
+                            );
+                        });
+                    }
+                });
+            }
+
+            // Invalidate queries to ensure fresh data on next fetch
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.adminCategories });
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zones, exact: false });
+        },
+    });
+};
+
+
+export const useParkingStateReport = () => {
+    return useQuery({
+        queryKey: QUERY_KEYS.adminParkingState,
+        queryFn: () => adminService.getParkingStateReport(),
+    });
+};
+
+export const useUpdateZoneOpen = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, request }: { id: string; request: UpdateZoneOpenRequest }) =>
+            adminService.updateZoneOpen(id, request),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.adminParkingState });
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zones, exact: false });
+        },
+    });
+};
+
+
+
+export const useCreateRushHour = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (request: CreateRushHourRequest) => adminService.createRushHour(request),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.adminRushHours });
+        },
+    });
+};
+
+
+export const useCreateVacation = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (request: CreateVacationRequest) => adminService.createVacation(request),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.adminVacations });
+        },
+    });
+};
+

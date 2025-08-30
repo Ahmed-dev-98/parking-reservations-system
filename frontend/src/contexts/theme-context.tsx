@@ -16,9 +16,17 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("system");
   const [systemTheme, setSystemTheme] = useState<"light" | "dark">("light");
+  const [mounted, setMounted] = useState(false);
 
-  // Check system preference
+  // Wait for hydration to complete before accessing client-side APIs
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Check system preference (only after mounting)
+  useEffect(() => {
+    if (!mounted) return;
+
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     setSystemTheme(mediaQuery.matches ? "dark" : "light");
 
@@ -28,18 +36,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
+  }, [mounted]);
 
-  // Load theme from localStorage on mount
+  // Load theme from localStorage on mount (only after mounting)
   useEffect(() => {
+    if (!mounted) return;
+
     const stored = localStorage.getItem(ELOCAL_STORAGE_KEYS.THEME) as Theme;
     if (stored && ["light", "dark", "system"].includes(stored)) {
       setThemeState(stored);
     }
-  }, []);
+  }, [mounted]);
 
-  // Apply theme to document
+  // Apply theme to document (only after mounting)
   useEffect(() => {
+    if (!mounted) return;
+
     const root = window.document.documentElement;
     root.classList.remove("light", "dark");
 
@@ -48,11 +60,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       root.classList.add(theme);
     }
-  }, [theme, systemTheme]);
+  }, [theme, systemTheme, mounted]);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem(ELOCAL_STORAGE_KEYS.THEME, newTheme);
+    if (mounted && typeof window !== "undefined") {
+      localStorage.setItem(ELOCAL_STORAGE_KEYS.THEME, newTheme);
+    }
   };
 
   return (

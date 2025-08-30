@@ -75,8 +75,8 @@ Produce a complete frontend application implementing the user interfaces and flo
 ## 3) Admin Dashboard (`/admin/*`)
 - Authentication: admin login (use `POST /auth/login`).
 - Screens:
-  - **Employees**: list and create employee accounts (calls to `POST /admin/users`, `GET /admin/users`).
-  - **Parking State Report** (`GET /admin/reports/parking-state`): table or cards showing every zone and server-provided `occupied`, `free`, `reserved`, `availableForVisitors`, `availableForSubscribers`, `subscriberCount`, `open`.
+// no apis r- **Employees**: list and create employee accounts (calls to `POST /admin/users`, `GET /admin/users`).
+ //done - **Parking State Report** (`GET /admin/reports/parking-state`): table or cards showing every zone and server-provided `occupied`, `free`, `reserved`, `availableForVisitors`, `availableForSubscribers`, `subscriberCount`, `open`.
   - **Control Panel**:
     - Open/Close zone (`PUT /admin/zones/{id}/open`).
     - Update category rates (`PUT /admin/categories/{id}`) — category-level rates only.
