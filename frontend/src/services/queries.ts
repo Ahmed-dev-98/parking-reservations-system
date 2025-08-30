@@ -2,8 +2,9 @@ import { QUERY_KEYS } from "@/constants/query-keys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import gateService from "./gate.service";
 import zoneService from "./zone.service";
-import { CheckinRequest, Zone } from "@/types/api";
+import { CheckinRequest, CheckoutRequest, Zone } from "@/types/api";
 import ticketService from "./ticket.service";
+import subscriptionService from "./subscription.service";
 
 
 
@@ -51,5 +52,31 @@ export const useCheckin = () => {
                 );
             }
         },
+    });
+};
+
+export const useCheckout = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (request: CheckoutRequest) => ticketService.checkout(request),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zones });
+        },
+    });
+};
+
+export const useTicket = (ticketId: string) => {
+    return useQuery({
+        queryKey: ['ticket', ticketId],
+        queryFn: () => ticketService.getTicket(ticketId),
+        enabled: !!ticketId,
+    });
+};
+
+export const useSubscription = (subscriptionId: string) => {
+    return useQuery({
+        queryKey: ['subscription', subscriptionId],
+        queryFn: () => subscriptionService.getSubscription(subscriptionId),
+        enabled: !!subscriptionId,
     });
 };

@@ -85,4 +85,29 @@ export interface Ticket {
     gateId: string;
     checkinAt: string;
     checkoutAt?: string;
+    subscriptionId?: string;
+}
+
+export interface Car {
+    plate: string;
+    brand: string;
+    model: string;
+    color: string;
+}
+
+export interface CurrentCheckin {
+    ticketId: string;
+    zoneId: string;
+    checkinAt: string;
+}
+
+export interface Subscription {
+    id: string;
+    userName: string;
+    active: boolean;
+    category: string;
+    cars: Car[];
+    startsAt: string;
+    expiresAt: string;
+    currentCheckins: CurrentCheckin[];
 }
