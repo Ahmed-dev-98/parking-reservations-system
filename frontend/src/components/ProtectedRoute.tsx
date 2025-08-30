@@ -24,6 +24,9 @@ export function ProtectedRoute({
     if (!loading) {
       // Not authenticated - redirect to login
       if (!isAuthenticated) {
+        console.log(
+          "====================redirecting to login reason not authenticated ===================="
+        );
         router.push(EROUTES.LOGIN);
         return;
       }

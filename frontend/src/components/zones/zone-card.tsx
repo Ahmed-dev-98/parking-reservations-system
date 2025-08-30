@@ -38,9 +38,19 @@ export function ZoneCard({ zone }: ZoneCardProps) {
 
   const getRateDisplay = () => {
     return (
-      <div className="text-sm">
-        <div>Normal: ${zone.rateNormal}/hr</div>
-        <div>Special: ${zone.rateSpecial}/hr</div>
+      <div className="text-sm transition-all duration-300 ease-in-out">
+        <div className="flex items-center space-x-1">
+          <span>Normal:</span>
+          <span className="font-semibold text-green-600">
+            ${zone.rateNormal}/hr
+          </span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <span>Special:</span>
+          <span className="font-semibold text-orange-600">
+            ${zone.rateSpecial}/hr
+          </span>
+        </div>
       </div>
     );
   };

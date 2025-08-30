@@ -7,7 +7,7 @@
 # Goal
 Produce a complete frontend application implementing the user interfaces and flows described below that consume the provided backend API and WebSocket. Focus on correctness, UX, realtime updates, and clean, maintainable code.
 
-**Intended difficulty:** moderate (2–3 years experience).  
+**Intended difficulty:** moderate (2–3 years experience).
 **Candidate time guidance:** the task is designed to be doable within a short assignment window (your team’s target ~4–5 days).
 
 ---
@@ -24,17 +24,17 @@ Produce a complete frontend application implementing the user interfaces and flo
 ---
 
 # Tech stack & constraints
-- Required: **React** (can be plain React or **Next.js**)  
-- State management: choose **Redux Toolkit** *or* **Zustand**  
-- Data fetching / caching: **React Query** (recommended)  
-- WebSocket: browser WebSocket API (or a tiny wrapper) — keep it minimal  
-- Styling: your choice (CSS modules, Tailwind, styled-components, plain CSS). Aim for clean, decent UI.  
+- Required: **React** (can be plain React or **Next.js**)
+- State management: choose **Redux Toolkit** *or* **Zustand**
+- Data fetching / caching: **React Query** (recommended)
+- WebSocket: browser WebSocket API (or a tiny wrapper) — keep it minimal
+- Styling: your choice (CSS modules, Tailwind, styled-components, plain CSS). Aim for clean, decent UI.
 - The frontend **must not** reimplement business logic (reserved slot calc, fee calc, breakdown splitting, etc.). Always display server-provided fields.
 
 ---
 
 # Where to get the API & seed data
-- Use the provided backend starter (Express + ws) you already have.  
+- Use the provided backend starter (Express + ws) you already have.
 - Read the `API_DOC.md` (separate file) for endpoint shapes, sample requests/responses, and the websocket contract. The frontend must follow that API.
 
 ---
@@ -63,11 +63,11 @@ Produce a complete frontend application implementing the user interfaces and flo
   - All UI availability indicators must reflect server payloads (no recalculation on client).
 
 ## 2) Checkpoint Screen — Check-out (`/checkpoint`)
-- Authentication: employee login (use `POST /auth/login`); protect screen.
-- UI: input for scanned ticket id (text paste to simulate QR).
+- Authentication: employee login (use `POST /auth/login`); protect screen. // done
+- UI: input for scanned ticket id (text paste to simulate QR). // done
 - Lookup/Checkout flow:
-  - Fetch ticket (optional `GET /tickets/:id`) or call `POST /tickets/checkout` to compute amount.
-  - Display server-returned `breakdown` (segments with rateMode, hours, rate, amount), `durationHours`, and total `amount`.
+  - Fetch ticket (optional `GET /tickets/:id`) or call `POST /tickets/checkout` to compute amount. // done
+  - Display server-returned `breakdown` (segments with rateMode, hours, rate, amount), `durationHours`, and total `amount`. // done
   - If ticket is subscriber-related, fetch `GET /subscriptions/:id` (if subscription id is included in ticket info) and show subscription cars so employee can compare plates visually. Employee decides if plate matches.
   - If mismatch, allow employee to **Convert to Visitor** (call checkout with `{ forceConvertToVisitor: true }`).
 - On success, show confirmation and ensure WS zone updates reflect occupancy change.
@@ -75,8 +75,8 @@ Produce a complete frontend application implementing the user interfaces and flo
 ## 3) Admin Dashboard (`/admin/*`)
 - Authentication: admin login (use `POST /auth/login`).
 - Screens:
-  - **Employees**: list and create employee accounts (calls to `POST /admin/users`, `GET /admin/users`).
-  - **Parking State Report** (`GET /admin/reports/parking-state`): table or cards showing every zone and server-provided `occupied`, `free`, `reserved`, `availableForVisitors`, `availableForSubscribers`, `subscriberCount`, `open`.
+// no apis r- **Employees**: list and create employee accounts (calls to `POST /admin/users`, `GET /admin/users`).
+ //done - **Parking State Report** (`GET /admin/reports/parking-state`): table or cards showing every zone and server-provided `occupied`, `free`, `reserved`, `availableForVisitors`, `availableForSubscribers`, `subscriberCount`, `open`.
   - **Control Panel**:
     - Open/Close zone (`PUT /admin/zones/{id}/open`).
     - Update category rates (`PUT /admin/categories/{id}`) — category-level rates only.

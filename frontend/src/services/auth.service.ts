@@ -26,35 +26,15 @@ class AuthService {
         CookieService.deleteCookie(ECOOKIES_KEYS.AUTH_TOKEN);
     }
 
-    // Decode JWT token to extract user info
-    public decodeToken(token: string): User | null {
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            return {
-                id: payload.sub || payload.userId,
-                username: payload.username,
-                role: payload.role,
-            };
-        } catch (error) {
-            console.error('Error decoding token:', error);
-            return null;
-        }
-    }
 
-    public getCurrentUser(): User | null {
+
+    public isTokenValid(): boolean {
         const token = this.getAuthToken();
-        if (!token) return null;
-        return this.decodeToken(token);
-    }
-
-    public isTokenValid(token: string): boolean {
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const currentTime = Date.now() / 1000;
-            return payload.exp > currentTime;
-        } catch {
-            return false;
-        }
+        if (!token) return false;
+        const payload = JSON.parse(token);
+        const currentTime = Date.now();
+        const isTokenValid = payload.exp > currentTime;
+        return isTokenValid;
     }
 
     // Auth endpoints
@@ -63,7 +43,13 @@ class AuthService {
             username,
             password,
         });
-        this.setAuthToken(response.data.token);
+        // we will create our token by merging user data with exp date of 7 days
+
+        const tokenizedUser = {
+            ...response.data.user,
+            exp: Date.now() + 7 * 24 * 60 * 60 * 1000
+        }
+        this.setAuthToken(JSON.stringify(tokenizedUser));
         return response.data;
     }
 
