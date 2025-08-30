@@ -23,15 +23,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check if user is authenticated on mount
   useEffect(() => {
     const checkAuth = () => {
-      const token = AuthService.getAuthToken();
-      if (token && AuthService.isTokenValid(token)) {
-        const userData = AuthService.decodeToken(token);
-        setUser(userData);
-      } else if (token) {
-        // Token is invalid, clear it
+      if (AuthService.isTokenValid()) {
+        const token = AuthService.getAuthToken();
+        if (token) {
+          const userData = JSON.parse(token);
+          setUser({
+            id: userData.id,
+            username: userData.username,
+            role: userData.role,
+          });
+          setLoading(false);
+        }
+      } else {
         AuthService.clearAuthToken();
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkAuth();

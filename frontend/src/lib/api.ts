@@ -31,7 +31,7 @@ class ApiClient {
             (error) => {
                 if (error.response?.status === 401) {
                     AuthService.clearAuthToken();
-                    if (typeof window !== 'undefined') {
+                    if (typeof window !== 'undefined' && !window.location.pathname.includes(EROUTES.LOGIN)) {
                         window.location.href = EROUTES.LOGIN;
                     }
                 }

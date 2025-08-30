@@ -2,29 +2,10 @@
 
 import Gates from "@/components/gates/gates";
 import { Layout } from "@/components/Layout";
-import { useAuth } from "@/contexts/auth-context";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { EROUTES } from "@/constants/routes";
-import { Car, Shield, User, ArrowRight } from "lucide-react";
+import { Car } from "lucide-react";
 import React from "react";
 
 const HomePage = () => {
-  const { isAuthenticated, isAdmin, isEmployee } = useAuth();
-  const router = useRouter();
-
-  const handleGetStarted = () => {
-    if (isAuthenticated) {
-      if (isAdmin) {
-        router.push(EROUTES.ADMIN);
-      } else if (isEmployee) {
-        router.push(EROUTES.CHECKPOINT);
-      }
-    } else {
-      router.push(EROUTES.LOGIN);
-    }
-  };
-
   return (
     <Layout title="Parking Reservation System">
       <div className="flex flex-col gap-8">
