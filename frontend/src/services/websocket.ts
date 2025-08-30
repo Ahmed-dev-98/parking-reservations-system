@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useRef, useCallback } from 'react';
 import { WSSubscribeMessage } from '@/types/api';
@@ -10,6 +11,7 @@ export interface WebSocketCallbacks {
     onConnect?: () => void;
     onDisconnect?: () => void;
     onError?: (error: Event) => void;
+    onMessage?: (message: any) => void;
 }
 export const useWebSocket = (callbacks: WebSocketCallbacks = {}) => {
     const wsRef = useRef<WebSocket | null>(null);
@@ -36,6 +38,15 @@ export const useWebSocket = (callbacks: WebSocketCallbacks = {}) => {
                 console.log('WebSocket connected');
                 reconnectAttemptsRef.current = 0;
                 callbacksRef.current.onConnect?.();
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    callbacksRef.current.onMessage?.(message);
+                } catch (error) {
+                    console.error('Error parsing WebSocket message:', error);
+                }
             };
 
 
@@ -109,5 +120,6 @@ export const useWebSocket = (callbacks: WebSocketCallbacks = {}) => {
         subscribe,
         unsubscribe,
         isConnected,
+        connection: wsRef.current,
     };
 };
