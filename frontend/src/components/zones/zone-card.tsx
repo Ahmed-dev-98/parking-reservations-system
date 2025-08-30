@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckinResponse, Zone } from "@/types/api";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,18 +22,27 @@ interface ZoneCardProps {
 
 export function ZoneCard({ zone }: ZoneCardProps) {
   const [showTicketModal, setShowTicketModal] = useState(false);
-  const { mutate: checkin, isSuccess, data: ticketData } = useCheckin();
+  const {
+    mutate: checkin,
+    isSuccess,
+    data: ticketData,
+    isPending,
+  } = useCheckin();
   const { gateId } = useParams();
+
+  // Handle mutation success with useEffect
+  React.useEffect(() => {
+    if (isSuccess && ticketData) {
+      setShowTicketModal(true);
+    }
+  }, [isSuccess, ticketData]);
+
   const handleConfirmReservation = () => {
     checkin({
       gateId: gateId as string,
       zoneId: zone.id,
       type: "visitor",
     });
-    if (isSuccess) {
-      console.log(ticketData);
-      setShowTicketModal(true);
-    }
   };
 
   const getRateDisplay = () => {
@@ -122,21 +131,30 @@ export function ZoneCard({ zone }: ZoneCardProps) {
         {getRateDisplay()}
         {zone.open && zone.availableForVisitors > 0 ? (
           <AlertDialog>
-            <AlertDialogTrigger className="bg-blue-500 text-white px-4 py-2 cursor-pointer rounded-md">
-              Go
+            <AlertDialogTrigger
+              className="bg-blue-500 text-white px-4 py-2 cursor-pointer rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={isPending}
+            >
+              {isPending ? "Processing..." : "Go"}
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogTitle>Confirm Parking Reservation</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete
-                  your account and remove your data from our servers.
+                  You are about to reserve a parking slot in {zone.name}. Rate:
+                  ${zone.rateNormal}/hr (Normal) | ${zone.rateSpecial}/hr
+                  (Special). Are you sure you want to proceed?
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleConfirmReservation}>
-                  Continue
+                <AlertDialogCancel disabled={isPending}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleConfirmReservation}
+                  disabled={isPending}
+                >
+                  {isPending ? "Processing..." : "Confirm Reservation"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

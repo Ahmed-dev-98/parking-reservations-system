@@ -24,6 +24,7 @@ const ParkingStateReport = ({
   // Use the WebSocket connection status
   const isConnected = webSocketConnection?.readyState === WebSocket.OPEN;
 
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -56,19 +57,30 @@ const ParkingStateReport = ({
     parkingStates?.reduce((sum, zone) => sum + zone.free, 0) || 0;
   const totalReserved =
     parkingStates?.reduce((sum, zone) => sum + zone.reserved, 0) || 0;
-  const totalSubscribers =
-    parkingStates?.reduce((sum, zone) => sum + zone.subscriberCount, 0) || 0;
+
   const occupancyRate =
     totalSlots > 0 ? ((totalOccupied / totalSlots) * 100).toFixed(1) : "0";
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-2">
-        <BarChart3 className="w-6 h-6 text-green-600" />
-        <h2 className="text-2xl font-bold">Parking State Report</h2>
-        <div className="flex items-center space-x-1 text-sm text-gray-500">
-          <Clock className="w-4 h-4" />
-          <span>Real-time data</span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <BarChart3 className="w-6 h-6 text-green-600" />
+          <h2 className="text-2xl font-bold">Parking State Report</h2>
+          <div className="flex items-center space-x-1 text-sm text-gray-500">
+            <Clock className="w-4 h-4" />
+            <span>Real-time data</span>
+          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div
+            className={`w-2 h-2 rounded-full ${
+              isConnected ? "bg-green-500 animate-pulse" : "bg-red-500"
+            }`}
+          />
+          <span className="text-sm text-gray-600">
+            {isConnected ? "Live updates" : "Offline"}
+          </span>
         </div>
       </div>
 
