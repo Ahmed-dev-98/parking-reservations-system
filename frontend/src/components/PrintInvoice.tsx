@@ -18,6 +18,7 @@ interface PrintInvoiceProps {
   durationHours: number;
   breakdown: BreakdownSegment[];
   amount: number;
+  printRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const PrintInvoice: React.FC<PrintInvoiceProps> = ({
@@ -27,93 +28,27 @@ const PrintInvoice: React.FC<PrintInvoiceProps> = ({
   durationHours,
   breakdown,
   amount,
+  printRef,
 }) => {
   const formatCurrency = (value: number) => `$${value.toFixed(2)}`;
   const formatDateTime = (dateString: string) =>
     new Date(dateString).toLocaleString();
 
   return (
-    <div className="print-invoice">
-      <style jsx global>{`
-        @media print {
-          @page {
-            margin: 0.3in;
-            size: A4;
-            /* Remove default headers and footers */
-            @top-left {
-              content: "";
-            }
-            @top-center {
-              content: "";
-            }
-            @top-right {
-              content: "";
-            }
-            @bottom-left {
-              content: "";
-            }
-            @bottom-center {
-              content: "";
-            }
-            @bottom-right {
-              content: "";
-            }
-          }
-
-          /* Hide browser default print headers/footers */
-          @page :first {
-            margin-top: 0.3in;
-          }
-
-          body * {
-            visibility: hidden;
-          }
-
-          .print-invoice,
-          .print-invoice * {
-            visibility: visible;
-          }
-
-          .print-invoice {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            height: auto !important;
-            max-height: 100vh !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white !important;
-            color: black !important;
-            font-family: "Arial", sans-serif !important;
-            font-size: 11px !important;
-            line-height: 1.2 !important;
-            page-break-after: avoid !important;
-            page-break-inside: avoid !important;
-            overflow: hidden !important;
-            box-sizing: border-box !important;
-          }
-
-          /* Ensure no content forces page breaks */
-          .print-invoice * {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-        }
-
-        .print-invoice {
-          display: none;
-        }
-
-        @media print {
-          .print-invoice {
-            display: block !important;
-          }
-        }
-      `}</style>
-
+    <div>
       {/* Print-only Invoice Template */}
-      <div style={{ padding: "10px", maxWidth: "100%", margin: "0" }}>
+      <div
+        ref={printRef}
+        style={{
+          display: "none",
+          padding: "10px",
+          maxWidth: "100%",
+          margin: "0",
+          backgroundColor: "#ffffff",
+          color: "#000000",
+          fontFamily: "Arial, sans-serif",
+        }}
+      >
         {/* Header */}
         <div
           style={{
@@ -133,7 +68,9 @@ const PrintInvoice: React.FC<PrintInvoiceProps> = ({
           >
             PARKING INVOICE
           </h1>
-          <p style={{ margin: "3px 0 0 0", fontSize: "12px", color: "#666" }}>
+          <p
+            style={{ margin: "3px 0 0 0", fontSize: "12px", color: "#6c757d" }}
+          >
             Payment Receipt
           </p>
         </div>
@@ -272,7 +209,7 @@ const PrintInvoice: React.FC<PrintInvoiceProps> = ({
             }}
           >
             <thead>
-              <tr style={{ backgroundColor: "#f5f5f5" }}>
+              <tr style={{ backgroundColor: "#f8f9fa" }}>
                 <th
                   style={{
                     padding: "6px",
@@ -349,7 +286,7 @@ const PrintInvoice: React.FC<PrintInvoiceProps> = ({
                     }}
                   >
                     <div>{formatDateTime(segment.from)}</div>
-                    <div style={{ color: "#666" }}>
+                    <div style={{ color: "#6c757d" }}>
                       to {formatDateTime(segment.to)}
                     </div>
                   </td>
@@ -386,14 +323,14 @@ const PrintInvoice: React.FC<PrintInvoiceProps> = ({
                         fontWeight: "bold",
                         backgroundColor:
                           segment.rateMode === "special"
-                            ? "#fef3c7"
-                            : "#dcfce7",
+                            ? "#fff3cd"
+                            : "#d1ecf1",
                         color:
                           segment.rateMode === "special"
-                            ? "#92400e"
-                            : "#166534",
+                            ? "#856404"
+                            : "#0c5460",
                         border: `1px solid ${
-                          segment.rateMode === "special" ? "#fbbf24" : "#22c55e"
+                          segment.rateMode === "special" ? "#ffc107" : "#28a745"
                         }`,
                       }}
                     >
@@ -447,7 +384,7 @@ const PrintInvoice: React.FC<PrintInvoiceProps> = ({
           style={{
             textAlign: "center",
             fontSize: "9px",
-            color: "#666",
+            color: "#6c757d",
             borderTop: "1px solid #ccc",
             paddingTop: "8px",
           }}

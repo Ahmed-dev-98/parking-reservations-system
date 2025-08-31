@@ -2,11 +2,20 @@
 
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { ThemeToggle } from "./ui/theme-toggle";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { EROUTES } from "@/constants/routes";
-import { useAuth } from "@/contexts/auth-context";
-import { LogOut, User, Shield } from "lucide-react";
+import {
+  useUser,
+  useIsAuthenticated,
+  useIsAdmin,
+  useIsEmployee,
+  useLogout,
+} from "@/store/auth-store";
+import {
+  useWebSocketConnected,
+  useWebSocketError,
+} from "@/store/websocket-store";
+import { LogOut, User, Shield, Wifi, WifiOff, AlertCircle } from "lucide-react";
 
 export function Layout({
   children,
@@ -16,7 +25,14 @@ export function Layout({
   title: string;
 }) {
   const router = useRouter();
-  const { user, logout, isAuthenticated, isAdmin, isEmployee } = useAuth();
+  const pathname = usePathname();
+  const user = useUser();
+  const isAuthenticated = useIsAuthenticated();
+  const isAdmin = useIsAdmin();
+  const isEmployee = useIsEmployee();
+  const logout = useLogout();
+  const isConnected = useWebSocketConnected();
+  const connectionError = useWebSocketError();
 
   const handleNavigate = (path: string) => {
     router.push(path);
@@ -39,12 +55,36 @@ export function Layout({
         <span className="text-xs bg-muted px-2 py-1 rounded-full">
           {user?.role}
         </span>
+
+        {/* Socket Status Indicator */}
+        <div className="flex items-center space-x-1">
+          {isConnected ? (
+            <div title="Connected" className="animate-pulse">
+              <Wifi className="w-4 h-4 text-green-500" />
+            </div>
+          ) : connectionError ? (
+            <div title={`Error: ${connectionError}`} className="animate-pulse">
+              <AlertCircle className="w-3 h-3 text-red-500" />
+            </div>
+          ) : (
+            <div title="Disconnected" className="animate-pulse">
+              <WifiOff className="w-3 h-3 text-gray-400" />
+            </div>
+          )}
+        </div>
       </div>
-      <ThemeToggle />
+
+      {/* Navigation */}
+      <Button variant="outline" onClick={() => handleNavigate(EROUTES.HOME)}>
+        Home
+      </Button>
+      <Button variant="outline" onClick={() => handleNavigate(EROUTES.GATES)}>
+        Gates
+      </Button>
 
       {/* Role-based navigation */}
       {isAdmin && (
-        <Button variant="outline" onClick={() => handleNavigate(EROUTES.ADMIN)}>
+        <Button  className="shadow-sm shadow-primary/50" variant="outline" onClick={() => handleNavigate(EROUTES.ADMIN)}>
           Admin Dashboard
         </Button>
       )}
@@ -52,6 +92,8 @@ export function Layout({
         <Button
           variant="outline"
           onClick={() => handleNavigate(EROUTES.CHECKPOINT)}
+          // make it more shining
+          className="shadow-sm shadow-primary/50"
         >
           Checkpoint
         </Button>
@@ -71,7 +113,31 @@ export function Layout({
 
   const renderUnauthenticatedNav = () => (
     <div className="flex items-center space-x-4">
-      <ThemeToggle />
+      <div className="flex items-center space-x-1">
+        {isConnected ? (
+          <div title="Connected" className="animate-pulse">
+            <Wifi className="w-4 h-4 text-green-500" />
+          </div>
+        ) : connectionError ? (
+          <div title={`Error: ${connectionError}`}>
+            <AlertCircle className="w-4 h-4 text-red-500" />
+          </div>
+        ) : (
+          <div title="Disconnected">
+            <WifiOff className="w-4 h-4 text-gray-400" />
+          </div>
+        )}
+      </div>
+      <Button
+        variant="outline"
+        onClick={() =>
+          pathname.includes(EROUTES.GATES)
+            ? handleNavigate(EROUTES.HOME)
+            : handleNavigate(EROUTES.GATES)
+        }
+      >
+        {pathname.includes(EROUTES.GATES) ? "Home" : "Gates"}
+      </Button>
       <Button variant="default" onClick={() => handleNavigate(EROUTES.LOGIN)}>
         Sign In
       </Button>
@@ -84,8 +150,11 @@ export function Layout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link href="/" className="text-xl font-bold text-foreground">
-                Parking System
+              <Link
+                href={EROUTES.HOME}
+                className="text-xl font-bold text-foreground"
+              >
+                WeLink Parking
               </Link>
             </div>
             {isAuthenticated
@@ -95,7 +164,7 @@ export function Layout({
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-[90%] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
     </div>

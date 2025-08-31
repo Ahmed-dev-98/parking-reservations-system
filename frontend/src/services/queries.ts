@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import gateService from "./gate.service";
@@ -41,6 +42,9 @@ export const useCheckin = () => {
             // Invalidate all zone queries to refresh zone state
             queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zones, exact: false });
 
+            // Also invalidate parking state report for admin dashboard
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.adminParkingState });
+
             // Update specific zone if we have gate context
             if (data.zoneState) {
                 const queryCache = queryClient.getQueryCache();
@@ -59,6 +63,14 @@ export const useCheckin = () => {
                         });
                     }
                 });
+
+                // Also update parking state report cache with the zone state
+                queryClient.setQueryData(QUERY_KEYS.adminParkingState, (oldData: any[]) => {
+                    if (!oldData) return oldData;
+                    return oldData.map(zone =>
+                        zone.id === data.zoneState.id ? { ...zone, ...data.zoneState } : zone
+                    );
+                });
             }
         },
     });
@@ -68,8 +80,39 @@ export const useCheckout = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (request: CheckoutRequest) => ticketService.checkout(request),
-        onSuccess: () => {
+        onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: QUERY_KEYS.zones, exact: false });
+
+            // Also invalidate parking state report for admin dashboard
+            queryClient.invalidateQueries({ queryKey: QUERY_KEYS.adminParkingState });
+
+            // Update zone state if available in response
+            if (data?.zoneState) {
+                const queryCache = queryClient.getQueryCache();
+                const zoneQueries = queryCache.findAll({
+                    queryKey: QUERY_KEYS.zones,
+                    exact: false
+                });
+
+                zoneQueries.forEach(query => {
+                    if (query.state.data) {
+                        queryClient.setQueryData(query.queryKey, (oldData: Zone[]) => {
+                            if (!oldData) return oldData;
+                            return oldData.map(zone =>
+                                zone.id === data.zoneState.id ? data.zoneState : zone
+                            );
+                        });
+                    }
+                });
+
+                // Also update parking state report cache
+                queryClient.setQueryData(QUERY_KEYS.adminParkingState, (oldData: any[]) => {
+                    if (!oldData) return oldData;
+                    return oldData.map(zone =>
+                        zone.id === data.zoneState.id ? { ...zone, ...data.zoneState } : zone
+                    );
+                });
+            }
         },
     });
 };
@@ -164,6 +207,9 @@ export const useParkingStateReport = () => {
     return useQuery({
         queryKey: QUERY_KEYS.adminParkingState,
         queryFn: () => adminService.getParkingStateReport(),
+        staleTime: 5 * 60 * 1000, // 5 minutes - data is fresh for 5 minutes
+        refetchOnWindowFocus: false, // Don't refetch on window focus to prevent excessive calls
+        refetchInterval: 30 * 1000, // Auto-refetch every 30 seconds for real-time data
     });
 };
 

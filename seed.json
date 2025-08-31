@@ -423,7 +423,8 @@
       "zoneId": "zone_c",
       "gateId": "gate_2",
       "checkinAt": "2025-08-24T08:00:00Z",
-      "checkoutAt": null
+      "checkoutAt": null,
+      "subscriptionId": "sub_003"
     },
     {
       "id": "t_015",

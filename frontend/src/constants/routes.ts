@@ -8,8 +8,9 @@ export const EAPI = {
 
 export const EROUTES = {
     LOGIN: '/login',
-    HOME: '/',
     CHECKPOINT: '/checkpoint',
     ADMIN: '/admin',
-    GATE: '/gate/:id'
+    GATE: '/gates/:id',
+    GATES: '/gates',
+    HOME : '/'
 }

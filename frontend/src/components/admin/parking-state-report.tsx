@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { BarChart3, Car, Users, MapPin, Clock } from "lucide-react";
+import { BarChart3, Car, Users, MapPin } from "lucide-react";
 import { useParkingStateReport } from "@/services/queries";
 import { Badge } from "../ui/badge";
 
@@ -56,19 +56,32 @@ const ParkingStateReport = ({
     parkingStates?.reduce((sum, zone) => sum + zone.free, 0) || 0;
   const totalReserved =
     parkingStates?.reduce((sum, zone) => sum + zone.reserved, 0) || 0;
-  const totalSubscribers =
-    parkingStates?.reduce((sum, zone) => sum + zone.subscriberCount, 0) || 0;
+
   const occupancyRate =
     totalSlots > 0 ? ((totalOccupied / totalSlots) * 100).toFixed(1) : "0";
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-2">
-        <BarChart3 className="w-6 h-6 text-green-600" />
-        <h2 className="text-2xl font-bold">Parking State Report</h2>
-        <div className="flex items-center space-x-1 text-sm text-gray-500">
-          <Clock className="w-4 h-4" />
-          <span>Real-time data</span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <BarChart3 className="w-6 h-6 text-green-600" />
+          <div>
+            <h1 className="text-3xl font-bold text-white">
+              Parking State Report
+            </h1>
+            <p className="text-muted-foreground">Monitor the parking system</p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2 px-3 py-1 bg-muted/50 rounded-lg">
+          <div
+            className={`w-2 h-2 rounded-full ${
+              isConnected ? "bg-green-500" : "bg-red-500"
+            }`}
+          />
+          <span className="text-xs text-white">
+            Real-time: {isConnected ? "Active" : "Offline"}
+          </span>
         </div>
       </div>
 

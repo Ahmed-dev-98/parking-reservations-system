@@ -3,7 +3,13 @@
 
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/auth-context";
+import {
+  useIsEmployee,
+  useIsAdmin,
+  useIsAuthenticated,
+  useAuthLoading,
+  useLogin,
+} from "@/store/auth-store";
 import {
   Card,
   CardContent,
@@ -25,13 +31,11 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const {
-    login,
-    isEmployee,
-    isAdmin,
-    isAuthenticated,
-    loading: authLoading,
-  } = useAuth();
+  const isEmployee = useIsEmployee();
+  const isAdmin = useIsAdmin();
+  const isAuthenticated = useIsAuthenticated();
+  const authLoading = useAuthLoading();
+  const login = useLogin();
   const router = useRouter();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,10 +56,18 @@ const LoginPage = () => {
         router.push(EROUTES.ADMIN);
       }
     } catch (err: any) {
-      setError(
-        err.response?.data?.message ||
-          "Login failed. Please check your credentials."
-      );
+      if (err.response?.status === 401) {
+        setError("Invalid username or password. Please try again.");
+      } else if (err.response?.status === 500) {
+        setError("Server error. Please try again later.");
+      } else if (err.code === "NETWORK_ERROR" || !err.response) {
+        setError("Network error. Please check your connection.");
+      } else {
+        setError(
+          err.response?.data?.message ||
+            "Login failed. Please check your credentials."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -154,7 +166,7 @@ const LoginPage = () => {
                 )}
               </Button>
               <Button
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/gates")}
                 type="button"
                 className="w-full h-11 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all duration-200 mt-4"
                 disabled={loading}
