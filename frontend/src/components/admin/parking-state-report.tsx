@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { BarChart3, Car, Users, MapPin, Clock } from "lucide-react";
+import { BarChart3, Car, Users, MapPin } from "lucide-react";
 import { useParkingStateReport } from "@/services/queries";
 import { Badge } from "../ui/badge";
 
@@ -23,7 +23,6 @@ const ParkingStateReport = ({
 
   // Use the WebSocket connection status
   const isConnected = webSocketConnection?.readyState === WebSocket.OPEN;
-
 
   if (isLoading) {
     return (
@@ -66,20 +65,22 @@ const ParkingStateReport = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <BarChart3 className="w-6 h-6 text-green-600" />
-          <h2 className="text-2xl font-bold">Parking State Report</h2>
-          <div className="flex items-center space-x-1 text-sm text-gray-500">
-            <Clock className="w-4 h-4" />
-            <span>Real-time data</span>
+          <div>
+            <h1 className="text-3xl font-bold text-white">
+              Parking State Report
+            </h1>
+            <p className="text-muted-foreground">Monitor the parking system</p>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
+
+        <div className="flex items-center space-x-2 px-3 py-1 bg-muted/50 rounded-lg">
           <div
             className={`w-2 h-2 rounded-full ${
-              isConnected ? "bg-green-500 animate-pulse" : "bg-red-500"
+              isConnected ? "bg-green-500" : "bg-red-500"
             }`}
           />
-          <span className="text-sm text-gray-600">
-            {isConnected ? "Live updates" : "Offline"}
+          <span className="text-xs text-white">
+            Real-time: {isConnected ? "Active" : "Offline"}
           </span>
         </div>
       </div>

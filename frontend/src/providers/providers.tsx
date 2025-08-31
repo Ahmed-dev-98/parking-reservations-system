@@ -3,9 +3,9 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
-import { WebSocketProvider } from "@/contexts/websocket-context";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthInitializer } from "@/components/auth-initializer";
+import { WebSocketInitializer } from "@/components/websocket-initializer";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -37,8 +37,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthInitializer>
-        <WebSocketProvider>{children}</WebSocketProvider>
-        <Toaster />
+        <WebSocketInitializer>
+          {children}
+          <Toaster />
+        </WebSocketInitializer>
       </AuthInitializer>
     </QueryClientProvider>
   );

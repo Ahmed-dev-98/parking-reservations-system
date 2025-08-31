@@ -10,6 +10,8 @@ export interface AuthResponse {
     token: string;
 }
 
+export type ZoneCategory = "cat_premium" | "cat_regular" | "cat_economy" | "cat_vip";
+
 export interface WSSubscribeMessage {
     type: 'subscribe' | 'unsubscribe';
     payload: {
@@ -27,7 +29,7 @@ export interface Gate {
 export interface Zone {
     id: string;
     name: string;
-    categoryId: string;
+    categoryId: ZoneCategory;
     gateIds: string[];
     totalSlots: number;
     occupied: number;
@@ -106,7 +108,7 @@ export interface Subscription {
     id: string;
     userName: string;
     active: boolean;
-    category: string;
+    category: ZoneCategory;
     cars: Car[];
     startsAt: string;
     expiresAt: string;

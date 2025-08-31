@@ -56,10 +56,18 @@ const LoginPage = () => {
         router.push(EROUTES.ADMIN);
       }
     } catch (err: any) {
-      setError(
-        err.response?.data?.message ||
-          "Login failed. Please check your credentials."
-      );
+      if (err.response?.status === 401) {
+        setError("Invalid username or password. Please try again.");
+      } else if (err.response?.status === 500) {
+        setError("Server error. Please try again later.");
+      } else if (err.code === "NETWORK_ERROR" || !err.response) {
+        setError("Network error. Please check your connection.");
+      } else {
+        setError(
+          err.response?.data?.message ||
+            "Login failed. Please check your credentials."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -158,7 +166,7 @@ const LoginPage = () => {
                 )}
               </Button>
               <Button
-                onClick={() => router.push("/")}
+                onClick={() => router.push("/gates")}
                 type="button"
                 className="w-full h-11 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all duration-200 mt-4"
                 disabled={loading}

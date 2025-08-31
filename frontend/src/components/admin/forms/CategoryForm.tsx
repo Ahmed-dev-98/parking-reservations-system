@@ -30,7 +30,6 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   } = useForm<CreateCategoryRequest>({
     defaultValues: {
       name: editingCategory?.name || "",
-      description: editingCategory?.description || "",
       rateNormal: editingCategory?.rateNormal || 0,
       rateSpecial: editingCategory?.rateSpecial || 0,
     },
@@ -59,7 +58,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
   return (
     <div className="p-4 border rounded-lg">
       <h4 className="font-medium mb-4">
-        {editingCategory ? "Edit Category" : "Create New Category"}
+   Edit Category
       </h4>
       <form onSubmit={handleSubmit(handleFormSubmit)}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -75,21 +74,6 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Input
-              id="description"
-              {...register("description", {
-                required: "Description is required",
-              })}
-              placeholder="Description"
-            />
-            {errors.description && (
-              <p className="text-sm text-red-500">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="rateNormal">Normal Rate</Label>
@@ -134,7 +118,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({
 
         <div className="flex space-x-2 mt-4">
           <Button type="submit" disabled={isLoading}>
-            {editingCategory ? "Update" : "Create"}
+           Update
           </Button>
           <Button type="button" variant="outline" onClick={handleCancel}>
             Cancel

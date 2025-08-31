@@ -5,10 +5,10 @@ import {
   useIsAuthenticated,
   useAuthLoading,
 } from "@/store/auth-store";
-import { LoadingPage } from "@/components/ui/loading";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { EROUTES } from "@/constants/routes";
+import LoadingPage from "./loading-page";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { QUERY_KEYS } from "@/constants/query-keys";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import gateService from "./gate.service";
@@ -206,8 +207,9 @@ export const useParkingStateReport = () => {
     return useQuery({
         queryKey: QUERY_KEYS.adminParkingState,
         queryFn: () => adminService.getParkingStateReport(),
-        staleTime: 0, // Always consider data stale to ensure updates work
-        refetchOnWindowFocus: true, // Refetch when window gains focus
+        staleTime: 5 * 60 * 1000, // 5 minutes - data is fresh for 5 minutes
+        refetchOnWindowFocus: false, // Don't refetch on window focus to prevent excessive calls
+        refetchInterval: 30 * 1000, // Auto-refetch every 30 seconds for real-time data
     });
 };
 

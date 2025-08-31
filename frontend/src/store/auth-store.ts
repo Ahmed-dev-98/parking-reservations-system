@@ -52,8 +52,16 @@ export const useAuthStore = create<AuthStore>()(
                         set({ loading: true });
                         const response = await AuthService.login(username, password);
                         get().setUser(response.user);
-                    } catch (error) {
-                        console.error('Login failed:', error);
+                    } catch (error: unknown) {
+                        // Only log unexpected errors, not auth failures
+                        if (error && typeof error === 'object' && 'response' in error) {
+                            const axiosError = error as { response?: { status?: number } };
+                            if (axiosError.response?.status !== 401) {
+                                console.error('Login failed:', error);
+                            }
+                        } else {
+                            console.error('Login failed:', error);
+                        }
                         throw error;
                     } finally {
                         set({ loading: false });
